@@ -1,0 +1,41 @@
+---
+# tasks file for java_downgrade
+
+- name: Disable puppet agent before java downgrade
+  shell: puppet agent --disable
+  tags:
+    - jboss
+
+- name: Check the installed version of java
+  shell: java -version 2>&1 | grep version | awk '{print $3}' | sed 's/"//g'
+  register: java_ver
+  tags:
+    - jboss
+
+#- name: Display java version
+#  debug:  "msg=Java version: '{{ j_ver.stdout }}'"
+
+- name: Remove java-1.7.0-oracle-1.7.0.131 with out dependencies
+  shell: rpm -e --nodeps java-1.7.0-oracle-1.7.0.131-1jpp.1.el6_8
+  ignore_errors: yes
+  when: java_ver.stdout == '1.7.0_131'
+  register: java_131
+  tags:
+    - jboss
+
+- name: Install java-1.7.0-oracle-1.7.0.121
+  shell: yum install java-1.7.0-oracle-1.7.0.121-1jpp.1.el6_8 -y
+  when: ( java_ver.stdout == '1.7.0_131' )
+  tags:
+    - jboss
+
+- name: Enable Puppet agent
+  shell: puppet agent --enable
+  tags:
+    - jboss
+
+- name: Run Puppet Agent
+  shell: puppet agent -tv
+  tags:
+    - jboss
+

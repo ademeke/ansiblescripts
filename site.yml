@@ -1,0 +1,4 @@
+---
+# file: site.yml
+- include: amq.yml
+- include: puppetservers.yml

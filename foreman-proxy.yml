@@ -1,0 +1,12 @@
+---
+# file:rhnactionsctrl.yml
+- hosts: dhcp
+  gather_facts: no
+  pre_tasks:
+    - shell: echo 'This playbook will upgrade Foreman smart proxy to version 1.6.3'
+
+  roles:
+    - foreman-proxy
+
+  post_tasks:
+    - shell: echo 'Foreman smart proxy has been successfully upgraded'

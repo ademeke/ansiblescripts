@@ -1,0 +1,35 @@
+---
+# file:bluecoat.yml
+- hosts: bluecoat
+  gather_facts: yes
+  pre_tasks:
+     - shell: echo 'I":" This playbook will install Blue Coat Root certificate'
+       register: txt
+       tags:
+          - itw
+          - ite
+#     - debug: msg=" {{ txt.stdout }}" 
+#       tags:
+#          - itw
+#          - ite
+   
+  vars:
+     ca_path:
+       7: /etc/pki/ca-trust/source
+       6: /etc/pki/ca-trust/source
+       5: /etc/pki/tls/certs
+     ca_cmd:
+       7: /usr/bin/update-ca-trust 
+       6: /usr/bin/update-ca-trust && /usr/bin/update-ca-trust force-enable
+       5: /usr/bin/c_rehash
+
+  roles:
+    - bluecoat
+
+
+  post_tasks:
+      - shell: echo 'I":"Blue Coat Root certificate has been installed successfully.'
+        tags:
+           - itw
+           - ite
+

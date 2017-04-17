@@ -1,0 +1,20 @@
+---
+# file:.yml
+- hosts: jboss
+  gather_facts: yes
+
+  roles:
+    - java_downgrade
+  
+  tasks:
+    - name: Check Java Version 
+      shell: java -version 2>&1 | grep version | awk '{print $3}' | sed 's/"//g' 
+      register: j_ver 
+      tags:
+        - jboss
+
+    - name: Display java version
+      debug:  msg="Java version '{{ j_ver.stdout }}'"
+      tags:
+        - jboss
+

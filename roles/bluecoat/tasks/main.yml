@@ -1,0 +1,81 @@
+---
+# tasks file for adding Blue Coat Root Certs
+
+- raw: yum -y install python-simplejson
+  notify: restart iptables
+  when:  (ansible_os_family == "RedHat" and ansible_distribution_major_version|int == 6)
+  tags:
+     - bluecoat
+     - itw
+     - ite
+
+- name: Backing up ca_bundle directory
+  shell: 'tar czf /etc/pki/tls/ca-bundle.tar /etc/pki/tls/certs/ca-bundle.*' 
+  tags:
+     - bluecoat
+     - itw
+     - ite
+
+
+- name: install ca packages
+  yum:
+     name: ca-certificates
+     state: present
+  when:  (ansible_os_family == "RedHat" and ansible_distribution_major_version|int == 7)  or  (ansible_os_family == "RedHat" and ansible_distribution_major_version|int == 6)
+  tags:
+      - bluecoat
+      - itw
+      - ite
+
+- name: install openssl-perl package for RHEL5 srevers 
+  yum:
+     name: openssl-perl
+     state: present
+  when:  ansible_distribution_major_version|int <= 5
+  tags:
+      - bluecoat
+      - itw
+      - ite
+
+
+- name: copy certificate authority to trusted ca path of the os
+  copy:
+      src: '{{ item }}'
+      dest: '{{ ca_path[ansible_distribution_major_version|int] }}/'
+      owner: root
+      group: root
+      mode: 0644
+  with_fileglob:
+      - '../files/bluecoat/labcerts/*'
+  tags:
+      - bluecoat
+      - itw
+
+- name: copy certificate authority to trusted ca path of the os
+  copy:
+      src: '{{ item }}'
+      dest: '{{ ca_path[ansible_distribution_major_version|int] }}/'
+      owner: root
+      group: root
+      mode: 0644
+  with_fileglob:
+      - '../files/bluecoat/prodcerts/*'
+  tags:
+      - bluecoat
+      - ite
+
+- debug: 
+    msg: ' System {{ inventory_hostname }} is getting {{ ca_cmd[ansible_distribution_major_version|int] }}'
+  tags:
+      - bluecoat
+      - itw
+      - ite
+
+
+- name: update trusted ca 
+  command: '{{ ca_cmd[ansible_distribution_major_version|int] }}'
+  #shell: '{{ ca_cmd[ansible_distribution_major_version|int] }} && echo "{{ ca_cmd[ansible_distribution_major_version|int] }}"'
+  tags:
+      - bluecoat
+      - itw
+      - ite

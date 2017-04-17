@@ -1,0 +1,80 @@
+---
+# tasks file for upgrading foreman-proxy
+- name: Check dhcpd.leases file on the remote system
+  stat: path=/var/lib/dhcpd/dhcpd.leases
+  register: leases_stat
+  tags: 
+     - dhcpd
+
+- name: Take a backup of the dhcpd.leases file
+  command: cp /var/lib/dhcpd/dhcpd.leases /var/lib/dhcpd/dhcpd.leases_PreUpgrade
+  when: leases_stat.stat.exists
+  tags:
+     - dhcpd
+
+- name: Take a backup of the settings.yml file
+  command: cp /etc/foreman-proxy/settings.yml /etc/foreman-proxy/settings.yml_PreUpgrade
+  tags:
+     - dhcpd
+     - puppet
+
+- name:  Install foreman-1.6 repository
+  yum: name=http://yum.theforeman.org/releases/1.6/el6/x86_64/foreman-release.rpm  state=present
+  register: foreman_repo
+  tags:
+     - dhcpd
+     - puppet
+
+- name: Stop dhcpd, foreman-proxy and puppet services
+  service: name={{ item }} state=stopped
+  when: foreman_repo.rc == 0
+  with_items:
+    - dhcpd
+    - foreman-proxy
+    - puppet
+  tags:
+     - dhcpd
+     - puppet
+
+- name: Stop Puppet Master services
+  service: name=httpd state=stopped
+  tags:
+     - puppet
+
+
+- name: Update foreman proxy to 1.6.3 version
+  yum: name=foreman-proxy state=latest
+  when: foreman_repo.rc == 0
+  tags:
+     - dhcpd
+     - puppet
+
+- name: Change ownership of settings.d directory
+  file: dest=/etc/foreman-proxy/settings.d/ owner=foreman-proxy group=foreman-proxy recurse=yes
+  tags:
+     - dhcpd
+     - puppet
+
+- name: Start Puppet Master services
+  service: name=httpd state=started
+  tags:
+     - puppet
+
+- name: Create a symlink for settings.d directory 
+  file: src=/etc/foreman-proxy/settings.d/ dest=/usr/share/foreman-proxy/config/settings.d state=link
+  tags:
+     - dhcpd
+     - puppet
+
+- name: Start Puppet dhcpd and foreman-proxy services
+  service: name={{ item }} state=started
+  with_items:
+     - dhcpd
+     - foreman-proxy 
+     - puppet
+  tags:
+     - puppet
+     - dhcpd 
+
+#- include: handlers/handlers.yml
+

@@ -1,0 +1,7 @@
+---
+- hosts: oc
+  gather_facts: no
+  roles:
+    - cups
+    
+

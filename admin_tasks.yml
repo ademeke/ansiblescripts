@@ -1,0 +1,11 @@
+---
+# file:bluecoat.yml
+- hosts: rootpw
+  gather_facts: yes
+   
+  vars:
+     rootpass: "hash"
+
+  roles:
+    - admin_tasks
+

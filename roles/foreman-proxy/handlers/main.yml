@@ -1,0 +1,20 @@
+---
+# handlers file for foreman-proxy
+- name: restart dhcpd
+  service: name=dhcpd state=restarted
+  tags:
+     - dhcpd
+
+- name: restart foreman-proxy
+  service: name=foreman-proxy state=restarted
+  tags:
+     - puppet
+     - dhcpd
+
+
+- name: restart puppet
+  service: name=puppet state=restarted
+  tags:
+     - puppet
+     - dhcpd
+

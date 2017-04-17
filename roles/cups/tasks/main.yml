@@ -1,0 +1,6 @@
+---
+# tasks file for cups
+- name:  run cups script
+  command: sh /opt/cups/cups_convert.sh
+- name: Run Puppet agent
+  command: puppet agent -tv

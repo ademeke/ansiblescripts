@@ -1,0 +1,80 @@
+---
+# tasks file for adding Blue Coat Root Certs
+
+#- raw: yum -y install python-simplejson
+#  tags: 
+#     - bluecoat
+#     - itw
+#     - ite
+
+#- name: Backing up ca_bundle
+- archive:
+    path: /etc/pki/tls/certs/ca-bundle.*
+    dest: /etc/pki/tls/certs/ca-bundle.gz
+  tags:
+     - bluecoat
+     - itw
+     - ite
+
+
+- name: install ca packages
+  yum:
+     name: ca-certificates
+     state: present
+  when:  ansible_distribution_major_version|int == 7 and  ansible_distribution_major_version|int == 6
+  tags:
+      - bluecoat
+      - itw
+      - ite
+
+- name: install openssl-perl package for RHEL5 srevers 
+  yum:
+     name: openssl-perl
+     state: present
+  when:  ansible_distribution_major_version|int <= 5
+  tags:
+      - bluecoat
+      - itw
+      - ite
+
+
+- name: copy certificate authority to trusted ca path of the os
+  copy:
+      src: '{{ item }}'
+      dest: '{{ ca_path[ansible_distribution_major_version|int] }}/'
+      owner: root
+      group: root
+      mode: 0644
+  with_fileglob:
+      #- '{{ ca_files }}/ca/{{ }}/*
+      - '../files/bluecoat/labcerts/*'
+  tags:
+      - bluecoat
+      - itw
+
+- name: copy certificate authority to trusted ca path of the os
+  copy:
+      src: '{{ item }}'
+      dest: '{{ ca_path[ansible_distribution_major_version|int] }}/'
+      owner: root
+      group: root
+      mode: 0644
+  with_fileglob:
+      - '../files/bluecoat/prodcerts/*'
+  tags:
+      - bluecoat
+      - ite
+
+
+- name: update trusted ca redhat
+  command: '{{ ca_cmd[ansible_distribution_major_version|int] }}'
+  tags:
+      - bluecoat
+      - itw
+      - ite
+
+# command     => '/bin/tar -cvf /etc/pki/tls/certs/ca-bundle.tar  /etc/pki/tls/certs/ca-bundle.*',
+#rhel5=/usr/bin/c_rehash
+#rhel6=/usr/bin/update-ca-trust
+#rhel7=/usr/bin/update-ca-trust && /usr/bin/update-ca-trust force-enable
+#/etc/pki/ca-trust/source/

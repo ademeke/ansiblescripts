@@ -1,0 +1,20 @@
+---
+#- name: Execute the script
+#  script: ../files/tq_staggered.sh
+
+- shell: "echo result-{{item}}"
+     register: "r"
+     with_items: 
+       - foo
+       - bar
+
+   - debug: var=r
+
+   #- debug: msg="item.item={{item.item}}, item.stdout={{item.stdout}}, item.changed={{item.changed}}"
+   - debug: msg="item.item={{item.item}}, item.stdout={{item.stdout}}"
+     with_items: "{{r.results}}"
+
+   #- debug: msg="Gets printed only if this item changed - {{item}}"
+   #  when: "{{item.changed == true}}"
+   #  with_items: "{{r.results}}"
+
