@@ -1,7 +1,0 @@
----
-- hosts: lime
-  gather_facts: yes
-  roles:
-    - lime
-    
-
