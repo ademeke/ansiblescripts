@@ -1,7 +1,6 @@
 ---
 # tasks file for admin_tasks
-- name: Change root password
-  
+- name: Change root password  
   user: name=root update_password=always password='{{ rootpass }}'
   tags:
     - root
